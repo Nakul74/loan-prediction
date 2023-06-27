@@ -48,30 +48,15 @@ st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Load data and models
 @st.cache(allow_output_mutation=True)
-def load_data():
-    return joblib.load('sample_test_set.pickle')
+def load_all_files():
+    return joblib.load('all_data.pkl')
 
-@st.cache(allow_output_mutation=True)
-def load_infos_client():
-    return joblib.load('infos_client.pickle')
-
-@st.cache(allow_output_mutation=True)
-def load_pret_client():
-    return joblib.load('pret_client.pickle')
-
-@st.cache(allow_output_mutation=True)
-def load_preprocessed_data():
-    return joblib.load('preprocessed_data.pickle')
-
-@st.cache(allow_output_mutation=True)
-def load_model():
-    return joblib.load('model.pkl')
-
-data = load_data()
-infos_client = load_infos_client()
-pret_client = load_pret_client()
-preprocessed_data = load_preprocessed_data()
-model = load_model()
+loaded_objects  = load_all_files()
+data = loaded_objects['data']
+infos_client = loaded_objects['infos_client']
+pret_client = loaded_objects['pret_client']
+preprocessed_data = loaded_objects['preprocessed_data']
+model = loaded_objects['model']
 
 # Extract column names and other required values
 column_names = preprocessed_data.columns.tolist()
