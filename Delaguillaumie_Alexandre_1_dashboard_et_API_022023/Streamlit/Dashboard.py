@@ -11,7 +11,32 @@ import plotly.express as px
 import shap
 import requests as re
 import numpy as np
+import plotly.express as px
 import warnings
+from PIL import Image
+
+# ====================================================================
+# HEADER - TITRE
+# ====================================================================
+html_header = """
+<head>
+<title>Application Dashboard credit Score</title>
+<meta charset="utf-8">
+<meta name="keywords" content="Home Crédit Group ( Dashboard, prêt, crédit score")>
+<meta name="description" content="Application de Crédit Score">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<h1 style="font-size:300%; color:#0031CC; font-family:Arial"> Prêt à dépenser <br>
+<h2 style="color:GREY; font-family:Georgia"> DASHBOARD</h2>
+<hr style= " display: block;
+margin-top: 0;
+margin-bottom: 0;
+margin-left: auto;
+margin-right: auto;
+border-style: inset;
+border-width: 1.5px;"/>
+</h1>
+"""
 
 # Set page configuration
 st.set_page_config(
@@ -20,6 +45,10 @@ st.set_page_config(
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+st.markdown("<style>body{background-color: #fbfff0}</style>", 
+            unsafe_allow_html=True)
+st.markdown(html_header, unsafe_allow_html=True)
 
 # Hide warning messages
 warnings.filterwarnings('ignore')
@@ -30,21 +59,6 @@ st.set_option('deprecation.showPyplotGlobalUse', False)
 #---------------------#
 
 API_URL = "http://127.0.0.1:8010"
-background_img_url = 'https://images.unsplash.com/photo-1501426026826-31c667bdf23d'
-
-page_bg_img = f"""
-<style>
-[data-testid="stAppViewContainer"] > .main {{
-background-image: url("{background_img_url}");
-background-size: 180%;
-background-position: top left;
-background-repeat: no-repeat;
-background-attachment: local;
-}}
-</style>
-"""
-
-st.markdown(page_bg_img, unsafe_allow_html=True)
 
 # Load data and models
 @st.cache(allow_output_mutation=True)
@@ -67,16 +81,15 @@ df_preprocess = model.named_steps['preprocessor'].transform(data)
 explainer = shap.TreeExplainer(classifier)
 generic_shap = explainer.shap_values(df_preprocess, check_additivity=False)
 
-# Set background image for the page
-page_bg_img = f"""
-<style>
-body {{
-    background-image: url("{background_img_url}");
-    background-size: cover;
-}}
-</style>
-"""
-st.markdown(page_bg_img, unsafe_allow_html=True)
+# --------------------------------------------------------------------
+# LOGO
+# --------------------------------------------------------------------
+# Chargement du logo de l'entreprise
+logo = Image.open("logo.png")
+st.sidebar.image(logo, width=240, 
+                 caption=" Dashboard - Decision support tool",
+                 use_column_width='always')
+
 
 # Display the heading
 st.title("Loan Approval Dashboard")
@@ -113,14 +126,32 @@ with st.sidebar:
     st.plotly_chart(gauge_figure)
 
 # Choose between displaying client information or prediction details
-c = st.selectbox('Select:', ['Client Info', 'Prediction'])
-if c == 'Client Info':
+client_info_checkbox = st.checkbox('Client Info')
+clinet_comp_checkbox = st.checkbox('Client Comparison')
+client_pred_checkbox = st.checkbox('Prediction',value=True)
+
+if client_info_checkbox:
     client_info = infos_client[infos_client.index == profile_ID].iloc[:, :]
     client_info_dict = client_info.to_dict('list')
     st.markdown('**Client Info:**')
     for i, j in client_info_dict.items():
         st.text(f"{i} = {j[0]}")
-else:
+        
+if clinet_comp_checkbox:
+    st.markdown('**Client Comparison:**')
+    features_to_compare = st.multiselect('Select features to compare', list(data.columns))
+    for feature in features_to_compare:
+        st.text(f'Feature = {feature}')
+        fig1 = px.histogram(data, x=feature)
+        st.text('Others')
+        st.plotly_chart(fig1)
+        fig2 = px.histogram(data[data.index == profile_ID], x=feature)
+        st.text('Client')
+        st.plotly_chart(fig2)
+
+        
+if client_pred_checkbox:
+    st.markdown('**Client Prediction:**')
     if 95 <= score_client < 100:
         score_text = 'PERFECT LOAN APPLICATION'
         st.success(score_text)
