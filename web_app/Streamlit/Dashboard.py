@@ -1,6 +1,8 @@
 #-----------------------#
 # IMPORT LIBRARIES #
 #-----------------------#
+import warnings
+warnings.filterwarnings('ignore')
 
 import streamlit as st
 import ast
@@ -12,7 +14,6 @@ import shap
 import requests as re
 import numpy as np
 import plotly.express as px
-import warnings
 from PIL import Image
 
 # ====================================================================
@@ -51,7 +52,6 @@ st.markdown("<style>body{background-color: #fbfff0}</style>",
 st.markdown(html_header, unsafe_allow_html=True)
 
 # Hide warning messages
-warnings.filterwarnings('ignore')
 st.set_option('deprecation.showPyplotGlobalUse', False)
 
 #---------------------#
@@ -185,6 +185,13 @@ if client_pred_checkbox:
                                                            expected_value = -2.9159221699244515,
                                                            feature_names=column_names,
                                                            max_display=20)
+        st.markdown("""
+        <span style="color:red"> Red variables *disadvantage** credit score</span>.
+        """, unsafe_allow_html=True)
+        
+        st.markdown("""
+        <span style="color:blue"> Blue variables *advantage** credit score</span>.
+        """, unsafe_allow_html=True)
         st.pyplot(waterfall)
 
     with col2:
@@ -212,3 +219,4 @@ if client_pred_checkbox:
                            color_discrete_sequence=['limegreen', 'tomato'],
                            hover_name=data.index)
         st.plotly_chart(chart)
+        

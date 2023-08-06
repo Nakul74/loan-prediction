@@ -20,3 +20,4 @@ shap==0.41.0
 streamlit==1.17.0
 tqdm==4.64.1
 xgboost==1.7.3
+altair==4.0.0

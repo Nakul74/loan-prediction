@@ -1,12 +1,12 @@
+import warnings
+warnings.filterwarnings('ignore')
+
 import joblib
 import pandas as pd
 import shap
 import json
 from flask import Flask
 import warnings
-
-warnings.filterwarnings('ignore')
-pd.options.mode.chained_assignment = None
 
 # Create the Flask app object
 app = Flask(__name__)
