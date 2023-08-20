@@ -99,8 +99,9 @@ st.markdown("Make informed decisions about loan approvals")
 with st.sidebar:
     st.markdown("### Profile Client")
     profile_ID = st.selectbox('Select a client:', list(data.index))
-    API_GET = API_URL+"/predict/"+(str(profile_ID))
-    score_client = 100 - int(re.get(API_GET).json() * 100)
+    API_POST = API_URL + "/predict"
+    response = re.post(API_POST, json={"client_id": profile_ID})
+    score_client = 100 - (response.json()["predict_proba"] * 100)
 
     # Check if the client is eligible for a loan based on the score
     if score_client < 100 - 10.344827586206896:
@@ -155,10 +156,10 @@ if client_pred_checkbox:
     if 95 <= score_client < 100:
         score_text = 'PERFECT LOAN APPLICATION'
         st.success(score_text)
-    elif 100 - 10.344827586206896 <= score_client < 95:
+    elif 100 - 17.24137931034483 <= score_client < 95:
         score_text = 'GOOD LOAN APPLICATION'
         st.success(score_text)
-    elif 70 <= score_client < 100 - 10.344827586206896:
+    elif 70 <= score_client < 100 - 17.24137931034483:
         score_text = 'REVIEW REQUIRED'
         st.warning(score_text)
     else:
@@ -177,8 +178,10 @@ if client_pred_checkbox:
     with col1:
         # Local interpretability using SHAP
         st.write(f"For client {profile_ID}:")
-        API_GET = API_URL+"/shap_client/" + (str(profile_ID))
-        shap_values = re.get(API_GET).json()
+        
+        API_POST = API_URL + "/shap_client"
+        response = re.post(API_POST, json={"client_id": profile_ID})
+        shap_values = response.json()
         shap_values = ast.literal_eval(shap_values['shap_client'])
         shap_values = np.array(shap_values).astype('float32')
         waterfall = shap.plots._waterfall.waterfall_legacy(shap_values=shap_values,

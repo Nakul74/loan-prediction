@@ -2,11 +2,9 @@ import warnings
 warnings.filterwarnings('ignore')
 
 import joblib
-import pandas as pd
 import shap
 import json
-from flask import Flask
-import warnings
+from flask import Flask, request, jsonify
 
 # Create the Flask app object
 app = Flask(__name__)
@@ -19,15 +17,18 @@ client_ids = data.index.tolist()
 # Retrieve the classifier from the model pipeline
 classifier = model.named_steps['classifier']
 
-@app.route("/predict/<int:client_id>")
-def predict(client_id):
+@app.route("/predict", methods=["POST"])
+def predict():
+    d = request.json
+    client_id = d.get("client_id")
+    
     # Perform predictions and return the probability of positive class
     predictions = model.predict_proba(data).tolist()
     predict_proba = []
     for pred, ID in zip(predictions, client_ids):
         if ID == client_id:
             predict_proba.append(pred[1])
-    return str(predict_proba[0])
+    return jsonify({"predict_proba": predict_proba[0]})
 
 @app.route('/generic_shap')
 def generic_shap():
@@ -39,8 +40,12 @@ def generic_shap():
     json_shap = json.dumps(shap_values_list)
     return {'shap_values': json_shap}
 
-@app.route('/shap_client/<int:client_id>')
-def shap_client(client_id):
+
+@app.route("/shap_client", methods=["POST"])
+def shap_client():
+    d = request.json
+    client_id = d.get("client_id")
+    
     # Calculate SHAP values for a specific client
     index_id = []
     for ind, ID in enumerate(client_ids):
